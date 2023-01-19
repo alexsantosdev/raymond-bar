@@ -1,0 +1,140 @@
+.mainContainer {
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+  align-items: center;
+
+  .contentContainer {
+    width: 100%;
+    padding: 40px;
+
+    display: flex;
+    flex-direction: column;
+
+    h2 {
+        font-size: 48px;
+        margin-bottom: 1rem;
+
+        b {
+            font-size: 52px;
+            font-weight: 900;
+        }
+    }
+
+    span {
+        color: #c5c5c5;
+        font-size: 16px;
+
+        &.boldSpan {
+            font-weight: 600;
+            font-size: 18px;
+            color: #caa520;
+        }
+    }
+
+    .formContainer {
+        margin-top: 2rem;
+        width: 100%;
+
+        .row {
+            width: 100%;
+
+            display: flex;
+            flex-direction: row;
+
+            gap: 8px;
+
+            input, select {
+                width: 100%;
+
+                background: none;
+                outline: none;
+
+                border: 1px solid #FFFFFF;
+                color: #FFFFFF;
+                padding: 12px 22px;
+
+                border-radius: 5px;
+
+                & + input {
+                    width: 8rem;
+                }
+            }
+
+            select {
+                width: max-content !important;
+
+                option {
+                    color: #29292e;
+                }
+            }
+
+            & + .row {
+                margin-top: 8px;
+            }
+        }
+
+        .addGuess {
+            background: none;
+            border: none;
+
+            color: #FFF;
+            font-weight: 500;
+
+            margin: 12px 0;
+        }
+    }
+  }
+
+    p {
+        margin-top: 2rem;
+        font-size: 16px;
+        color: #c8c8c8;
+    }
+
+    button {
+        margin: 2rem 0;
+        background: #caa520;
+        border: none;
+        border-radius: 5px;
+        color: #29292e;
+        font-weight: 600;
+        font-size: 16px;
+
+        padding: 12px 22px;
+        width: max-content;
+
+        display: flex;
+        flex-direction: row;
+
+        gap: 12px;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+            transition: filter 0.2s;
+            filter: brightness(0.8);
+        }
+    }
+
+    h3 {
+        color: #caa520;
+    }
+
+    .address {
+        margin-top: 4rem;
+        width: 100%;
+
+        display: flex;
+        flex-direction: row;
+
+        align-items: center;
+
+        gap: 8px;
+
+        img {
+            width: 18px;
+        }
+    }
+}
