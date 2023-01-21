@@ -9,24 +9,25 @@ import bg from '../../public/images/Background.png'
 
 import styles from './home.module.scss'
 import toast, { Toaster } from 'react-hot-toast'
+import { Modal } from '@/components/modal'
 
-type ResponseCompanionType = {
-  name: string,
-  age: number,
-  document: string,
-  user: number
-}
+// type ResponseCompanionType = {
+//   name: string,
+//   age: number,
+//   document: string,
+//   user: number
+// }
 
 type CompanionType = {
   name: string,
-  age: number,
-  document: string
+  phone: string,
+  email: string
 }
 
 type GuestType = {
   name : string,
-  age: number,
-  document: string,
+  phone: string,
+  email: string,
   companions: CompanionType[]
 }
 
@@ -34,26 +35,33 @@ export default function Home() {
 
   const [guests, setGuests] = useState(0)
 
-  const [guest, setGuest] = useState<GuestType[]>([])
-
   const [name, setName] = useState('')
-  const [age, setAge] = useState(0)
-  const [document, setDocument] = useState('')
+  const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState('')
   const [hasCompanion, setHasCompanion] = useState('')
   const [companions, setCompanions] = useState<CompanionType[]>([])
   const [confirm, setConfirm] = useState(false)
 
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
   // const api = axios.create({
   //   baseURL: 'http://localhost:8080'
   // })
+
+  const clearData = () => {
+    setName('')
+    setPhone('')
+    setEmail('')
+    setCompanions([])
+  }
 
   async function saveData() {
     const db = database
     let guestId = name.toLowerCase().trim()
     await set(ref(db, 'guests/' + guestId), {
       name: name,
-      age: age,
-      document: document
+      phone: phone,
+      email: email
     })
 
     if(companions.length !== 0) {
@@ -61,8 +69,8 @@ export default function Home() {
         let uniqueId = c.name.toLowerCase().trim()
         set(ref(db, 'companions/' + uniqueId), {
           name: c.name,
-          document: c.document,
-          age: c.age,
+          email: c.email,
+          phone: c.phone,
           guest_name: name
         })
       })
@@ -92,8 +100,8 @@ export default function Home() {
       const parsedData = Object.entries(data).map(([key, value]) => {
         return {
           name: value.name,
-          age: value.age,
-          document: value.document
+          phone: value.phone,
+          email: value.email
         }
       })
       guestLength = parsedData.length
@@ -105,12 +113,11 @@ export default function Home() {
       const parsedData = Object.entries(data).map(([key, value]) => {
         return {
           name: value.name,
-          age: value.age,
-          document: value.document
+          phone: value.phone,
+          email: value.email
         }
       })
       guestLength += parsedData.length
-
     })
 
     setGuests(guestLength)
@@ -123,7 +130,7 @@ export default function Home() {
   function addNewGuess() {
     setCompanions([
       ...companions,
-      {name: '', age: 0, document: ''}
+      {name: '', phone: '', email: ''}
     ])
   }
 
@@ -145,7 +152,7 @@ export default function Home() {
       return toast.error('O nome não pode estar vazio :(')
     }
 
-    if(age === 0) {
+    if(phone.trim() === '') {
       return toast.error('O campo idade deve ser preenchido.')
     }
 
@@ -160,17 +167,17 @@ export default function Home() {
           return toast.error('Um dos campos de nome dos convidados está vazio.')
         }
 
-        if(item.age === 0) {
+        if(item.phone.trim() === '') {
           setConfirm(false)
-          return toast.error('Um dos campos de idade dos convidados está vazio.')
+          return toast.error('Um dos campos de telefone dos convidados está vazio.')
         }
 
-        if(item.document.trim() === '') {
+        if(item.email.trim() === '') {
           setConfirm(false)
-          return toast.error('Um dos campos de documento está vazio.')
+          return toast.error('Um dos campos de email está vazio.')
         }
 
-        if(item.name.trim() !== '' && item.document.trim() !== '' && item.age !== 0) {
+        if(item.name.trim() !== '' && item.email.trim() !== '' && item.phone.trim() !== '') {
           setConfirm(true)
         }
       })
@@ -190,6 +197,9 @@ export default function Home() {
             error: <b>Não conseguimos confirmar sua presença :(</b>,
           }
         )
+
+        clearData()
+        setIsModalOpen(true)
 
         // toast.promise(
         //   api.post('/api/v1/guest/create', {
@@ -216,6 +226,7 @@ export default function Home() {
       </Head>
 
       <Toaster position='top-right' />
+      <Modal isOpen={isModalOpen} />
 
       <main className={styles.mainContainer} style={{backgroundImage: `url(${bg.src})`, width: '100vw', height: 'max-content', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundSize: 'cover'}}>
         <div className={styles.contentContainer}>
@@ -225,10 +236,10 @@ export default function Home() {
           <div className={styles.formContainer}>
             <div className={styles.row}>
               <input type='text' placeholder='Digite seu nome' value={name} onChange={e => setName(e.target.value)} />
-              <input type='number' placeholder='Sua idade' value={age === 0 ? '' : age} onChange={e => setAge(Number(e.target.value))} />
+              <input type='text' placeholder='Seu telefone' value={phone} onChange={e => setPhone(e.target.value)} />
             </div>
             <div className={styles.row}>
-              <input type="text" placeholder='RG' value={document} onChange={e => setDocument(e.target.value)} />
+              <input type="text" placeholder='Email' value={email} onChange={e => setEmail(e.target.value)} />
               <select value={hasCompanion} onChange={e => setHasCompanion(e.target.value)}>
                 <option value='' hidden>Possui acompanhante?</option>
                 <option value='sim'>Sim</option>
@@ -241,8 +252,8 @@ export default function Home() {
               return(
                 <div className={styles.row}>
                   <input name='name' type='text' placeholder='Nome do acompanhante' value={guessItem.name} onChange={e => setCompanionItemValue(index, 'name', e.target.value)} />
-                  <input type="text" placeholder='RG' value={guessItem.document} onChange={e => setCompanionItemValue(index, 'document', e.target.value)} />
-                  <input name='age' type='number' placeholder='Idade' value={guessItem.age === 0 ? '' : guessItem.age} onChange={e => setCompanionItemValue(index, 'age', e.target.value)} />
+                  <input type="text" placeholder='Email' value={guessItem.email} onChange={e => setCompanionItemValue(index, 'email', e.target.value)} />
+                  <input name='phone' type='text' placeholder='Telefone' value={guessItem.phone} onChange={e => setCompanionItemValue(index, 'phone', e.target.value)} />
                 </div>
               )
             })}
@@ -256,7 +267,7 @@ export default function Home() {
 
           <div className={styles.address}>
             <img src="/images/map.svg" alt="map pin" />
-            <span>Av. Nicola Accieri, S/N - Condomínio 7763, Reserva da mata. | 11/02 - 18h às 22h</span>
+            <span><a style={{color: '#2eb2ff'}} href="https://www.google.com/maps/place/Reserva+da+Mata+-+JUNDIA%C3%8D+%2F+CONDOM%C3%8DNIO/@-23.1176252,-46.9217467,17z/data=!3m1!4b1!4m5!3m4!1s0x94cf2f23addbb079:0x68798f85b22b916!8m2!3d-23.1176252!4d-46.919558" target="_blank">Av. Nicola Accieri, S/N - Condomínio 7763, Reserva da mata.</a> | 11/02 - 18h às 22h</span>
           </div>
         </div>
       </main>
