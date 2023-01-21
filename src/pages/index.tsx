@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import { useState, useEffect } from 'react'
 import { child, get, onValue, ref, set } from 'firebase/database'
+import axios from 'axios'
 
 import { database } from '../services/firebase'
 
@@ -9,67 +10,133 @@ import bg from '../../public/images/Background.png'
 import styles from './home.module.scss'
 import toast, { Toaster } from 'react-hot-toast'
 
-type ConvidadosType = {
-  id: string,
-  nome: string,
-  idade: number
+type ResponseCompanionType = {
+  name: string,
+  age: number,
+  document: string,
+  user: number
 }
 
-type Convidados = Record<string, {
-  nome: string,
-  idade: number
-}>
+type CompanionType = {
+  name: string,
+  age: number,
+  document: string
+}
+
+type GuestType = {
+  name : string,
+  age: number,
+  document: string,
+  companions: CompanionType[]
+}
 
 export default function Home() {
 
-  const [guest, setGuest] = useState<ConvidadosType[]>([])
+  const [guests, setGuests] = useState(0)
+
+  const [guest, setGuest] = useState<GuestType[]>([])
 
   const [name, setName] = useState('')
   const [age, setAge] = useState(0)
-  const [hasGuess, setHasGuess] = useState('')
-  const [guessItems, setGuessItems] = useState([
-    {name: '', age: 0}
-  ])
+  const [document, setDocument] = useState('')
+  const [hasCompanion, setHasCompanion] = useState('')
+  const [companions, setCompanions] = useState<CompanionType[]>([])
+  const [confirm, setConfirm] = useState(false)
 
-  const getGuessList = () => {
+  // const api = axios.create({
+  //   baseURL: 'http://localhost:8080'
+  // })
+
+  async function saveData() {
+    const db = database
+    let guestId = name.toLowerCase().trim()
+    await set(ref(db, 'guests/' + guestId), {
+      name: name,
+      age: age,
+      document: document
+    })
+
+    if(companions.length !== 0) {
+      companions.map(c => {
+        let uniqueId = c.name.toLowerCase().trim()
+        set(ref(db, 'companions/' + uniqueId), {
+          name: c.name,
+          document: c.document,
+          age: c.age,
+          guest_name: name
+        })
+      })
+    }
+  }
+
+  const listGuests = async () => {
+    let guestLength = 0
+    // await api.get('/api/v1/guests')
+    // .then(res => {
+    //   const guest: GuestType[] = res.data ?? {}
+    //   guestLength = guest.length
+    //   setGuest(guest)
+    // })
+
+    // await api.get('/api/v1/companions')
+    // .then(res => {
+    //   const companion: ResponseCompanionType[] = res.data ?? {}
+    //   guestLength += companion.length
+    // })
+
     const db = database
 
-    const guessCount = ref(db, 'convidados');
-    onValue(guessCount, (snapshot) => {
-      const res: Convidados = snapshot.val() ?? {}
-      const parsedRes = Object.entries(res).map(([key, value]) => {
+    const guestRef = ref(db, 'guests')
+    onValue(guestRef, snapshot => {
+      const data: GuestType[] = snapshot.val() ?? {}
+      const parsedData = Object.entries(data).map(([key, value]) => {
         return {
-          id: key,
-          nome: value.nome,
-          idade: value.idade
+          name: value.name,
+          age: value.age,
+          document: value.document
         }
       })
+      guestLength = parsedData.length
+    })
 
-      setGuest(parsedRes)
-    }) 
+    const companionRef = ref(db, 'companions')
+    onValue(companionRef, snapshot => {
+      const data: CompanionType[] = snapshot.val() ?? {}
+      const parsedData = Object.entries(data).map(([key, value]) => {
+        return {
+          name: value.name,
+          age: value.age,
+          document: value.document
+        }
+      })
+      guestLength += parsedData.length
+
+    })
+
+    setGuests(guestLength)
   }
 
   useEffect(() => {
-    getGuessList()
+    listGuests()
   }, [])
 
   function addNewGuess() {
-    setGuessItems([
-      ...guessItems,
-      {name: '', age: 0}
+    setCompanions([
+      ...companions,
+      {name: '', age: 0, document: ''}
     ])
   }
 
-  function setGuessItemValue(position: number, field: string, value: string) {
-    const updatedGuessItems = guessItems.map((guessItem, index) => {
+  function setCompanionItemValue(position: number, field: string, value: string) {
+    const updateCompanionItem = companions.map((companionItem, index) => {
       if(index === position) {
-        return { ...guessItem, [field]: value}
+        return { ...companionItem, [field]: value }
       }
 
-      return guessItem;
+      return companionItem;
     })
 
-    setGuessItems(updatedGuessItems)
+    setCompanions(updateCompanionItem)
   }
 
   async function handleConfirm() {
@@ -82,37 +149,63 @@ export default function Home() {
       return toast.error('O campo idade deve ser preenchido.')
     }
 
-    if(hasGuess.trim() === '') {
+    if(hasCompanion.trim() === '') {
       return toast.error('É necessário informar se levará acompanhante.')
     }
 
-    if(hasGuess.trim() === 'sim') {
-      guessItems.map(item => {
+    if(hasCompanion.trim() === 'sim') {
+      companions.map(item => {
         if(item.name.trim() === '') {
+          setConfirm(false)
           return toast.error('Um dos campos de nome dos convidados está vazio.')
         }
 
         if(item.age === 0) {
+          setConfirm(false)
           return toast.error('Um dos campos de idade dos convidados está vazio.')
         }
-      })
 
-      return
+        if(item.document.trim() === '') {
+          setConfirm(false)
+          return toast.error('Um dos campos de documento está vazio.')
+        }
+
+        if(item.name.trim() !== '' && item.document.trim() !== '' && item.age !== 0) {
+          setConfirm(true)
+        }
+      })
+    }else if(hasCompanion.trim() === 'nao') {
+      setConfirm(true)
     }
 
-    if(guest.length === 50) {
+    if(guests === 50) {
       return toast.error('Infelizmente a lista está cheia :(')
     }else {
-      const db = database
+      if(confirm) {
+        toast.promise(
+          saveData(),
+          {
+            loading: 'Estamos confirmando sua presença...',
+            success: <b>Presença confirmada!</b>,
+            error: <b>Não conseguimos confirmar sua presença :(</b>,
+          }
+        )
 
-      await set(ref(db, 'convidados/' + name.trim()), {
-        nome: name,
-        idade: age,
-        possuiAcompanhante: hasGuess,
-        acompanhantes: guessItems
-      })
-  
-      return toast.success('Você está confirmado!')
+        // toast.promise(
+        //   api.post('/api/v1/guest/create', {
+        //     name: name,
+        //     age: age,
+        //     document: document,
+        //     companions: companions ? companions : []
+        //   }),
+        //   {
+        //     loading: 'Estamos confirmando sua presença...',
+        //     success: <b>Presença confirmada!</b>,
+        //     error: <b>Não conseguimos confirmar sua presença :(</b>,
+        //   }
+        // );
+        listGuests()
+      }
     }
   }
 
@@ -122,47 +215,48 @@ export default function Home() {
         <title>Boteco do Raymond 5.0</title>
       </Head>
 
-      <Toaster position='bottom-right' />
+      <Toaster position='top-right' />
 
-      <main className={styles.mainContainer} style={{backgroundImage: `url(${bg.src})`, width: '100vw', height: '100vh', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundSize: 'cover'}}>
+      <main className={styles.mainContainer} style={{backgroundImage: `url(${bg.src})`, width: '100vw', height: 'max-content', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundSize: 'cover'}}>
         <div className={styles.contentContainer}>
           <h2>Boteco do Raymond <b>5.0</b></h2>
           <span>Você está sendo convidado para a primeira comemoração do ano, sua presença é muito importante.</span>
-          <span className={styles.boldSpan}>Traga uma bebida da sua preferência, sua mesa já está reservada!</span>
+          <span className={styles.boldSpan}>Traga uma bebida da sua preferência e um kit churrasco, sua mesa já está reservada!</span>
           <div className={styles.formContainer}>
             <div className={styles.row}>
               <input type='text' placeholder='Digite seu nome' value={name} onChange={e => setName(e.target.value)} />
-              <input type='number' placeholder='Sua idade' value={age} onChange={e => setAge(Number(e.target.value))} />
-              <select value={hasGuess} onChange={e => setHasGuess(e.target.value)}>
+              <input type='number' placeholder='Sua idade' value={age === 0 ? '' : age} onChange={e => setAge(Number(e.target.value))} />
+            </div>
+            <div className={styles.row}>
+              <input type="text" placeholder='RG' value={document} onChange={e => setDocument(e.target.value)} />
+              <select value={hasCompanion} onChange={e => setHasCompanion(e.target.value)}>
                 <option value='' hidden>Possui acompanhante?</option>
                 <option value='sim'>Sim</option>
                 <option value='nao'>Não</option>
               </select>
             </div>
-            <div className={styles.row}>
-              
-            </div>
 
-            {hasGuess === 'sim' && <button className={styles.addGuess} onClick={addNewGuess}>+ Acompanhante</button> }
-            {hasGuess === 'sim' && guessItems.map((guessItem, index) => {
+            {hasCompanion === 'sim' && <button className={styles.addGuess} onClick={addNewGuess}>Adicionar acompanhante</button> }
+            {hasCompanion === 'sim' && companions.map((guessItem, index) => {
               return(
                 <div className={styles.row}>
-                  <input name='name' type='text' placeholder='Nome do acompanhante' value={guessItem.name} onChange={e => setGuessItemValue(index, 'name', e.target.value)} />
-                  <input name='age' type='number' placeholder='Idade' value={guessItem.age} onChange={e => setGuessItemValue(index, 'age', e.target.value)} />
+                  <input name='name' type='text' placeholder='Nome do acompanhante' value={guessItem.name} onChange={e => setCompanionItemValue(index, 'name', e.target.value)} />
+                  <input type="text" placeholder='RG' value={guessItem.document} onChange={e => setCompanionItemValue(index, 'document', e.target.value)} />
+                  <input name='age' type='number' placeholder='Idade' value={guessItem.age === 0 ? '' : guessItem.age} onChange={e => setCompanionItemValue(index, 'age', e.target.value)} />
                 </div>
               )
             })}
           </div>
-          <p>Ao clicar em "Confirmar" você está ciente de que se <b>BEBER</b> não dirija, chame um <b>UBER</b>!</p>
+          <p>Ao clicar em "Confirmar" você está ciente de que se você for <b>BEBER</b> não dirija, chame um <b>UBER</b>!</p>
           <button onClick={handleConfirm}>
             <img src="/images/beer-button.svg" alt="icon" />
             Confirmar presença
           </button>
-          <h3>Restam apenas {50 - guest.length} de 50 vagas.</h3>
+          <h3>Restam apenas {50 - guests} de 50 vagas.</h3>
 
           <div className={styles.address}>
             <img src="/images/map.svg" alt="map pin" />
-            <span>Av. Nicola Accieri, S/N - Condomínio 7763, Reserva da mata. | 18h às 22h</span>
+            <span>Av. Nicola Accieri, S/N - Condomínio 7763, Reserva da mata. | 11/02 - 18h às 22h</span>
           </div>
         </div>
       </main>

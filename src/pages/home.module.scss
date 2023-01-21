@@ -27,6 +27,7 @@
         font-size: 16px;
 
         &.boldSpan {
+            margin-top: 8px;
             font-weight: 600;
             font-size: 18px;
             color: #caa520;
@@ -57,7 +58,7 @@
 
                 border-radius: 5px;
 
-                & + input {
+                &:last-child {
                     width: 8rem;
                 }
             }
@@ -76,7 +77,7 @@
         }
 
         .addGuess {
-            background: none;
+            background: #2eb2ff;
             border: none;
 
             color: #FFF;
@@ -138,3 +139,24 @@
         }
     }
 }
+
+@media (max-width: 720px) {
+    .mainContainer {
+        .contentContainer {
+            .formContainer {
+                height: 300px;
+                overflow-y: scroll;
+                .row {
+                    flex-direction: column;
+                    input, select {
+                        width: 100%;
+
+                        &:last-child {
+                            width: 100% !important;
+                        }
+                    }
+                }
+            }
+        }
+    }
+  }
