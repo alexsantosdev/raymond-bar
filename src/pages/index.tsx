@@ -53,6 +53,34 @@ export default function Home({ guestLength }: HomeProps) {
   //   baseURL: 'http://localhost:8080'
   // })
 
+  const db = database
+
+  const guestRef = ref(db, 'guests')
+  onValue(guestRef, snapshot => {
+    const data: GuestType[] = snapshot.val() ?? {}
+    const parsedData = Object.entries(data).map(([key, value]) => {
+      return {
+        name: value.name,
+        phone: value.phone,
+        email: value.email
+      }
+    })
+    guestLength = parsedData.length
+  })
+
+  const companionRef = ref(db, 'companions')
+  onValue(companionRef, snapshot => {
+    const data: CompanionType[] = snapshot.val() ?? {}
+    const parsedData = Object.entries(data).map(([key, value]) => {
+      return {
+        name: value.name,
+        phone: value.phone,
+        email: value.email
+      }
+    })
+    guestLength += parsedData.length
+  })
+
   const clearData = () => {
     setName('')
     setPhone('')
@@ -321,7 +349,6 @@ export const getStaticProps: GetStaticProps = async () => {
   return {
     props: {
       guestLength,
-    },
-    revalidate: 60 * 60 * 24, //24 hours
+    }
   }
 }
