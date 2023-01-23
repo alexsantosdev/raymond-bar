@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { child, get, onValue, ref, set } from 'firebase/database'
 import axios from 'axios'
 
@@ -10,7 +10,6 @@ import bg from '../../public/images/Background.png'
 import styles from './home.module.scss'
 import toast, { Toaster } from 'react-hot-toast'
 import { Modal } from '@/components/modal'
-import { GetStaticProps } from 'next'
 
 // type ResponseCompanionType = {
 //   name: string,
@@ -32,11 +31,7 @@ type GuestType = {
   companions: CompanionType[]
 }
 
-interface HomeProps {
-  guestLength: number
-}
-
-export default function Home({ guestLength }: HomeProps) {
+export default function Home() {
 
   const [guests, setGuests] = useState(0)
 
@@ -46,6 +41,8 @@ export default function Home({ guestLength }: HomeProps) {
   const [hasCompanion, setHasCompanion] = useState('')
   const [companions, setCompanions] = useState<CompanionType[]>([])
   const [confirm, setConfirm] = useState(false)
+  const [length, setLength] = useState(0)
+  const [count, setCount] = useState(0)
 
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -53,33 +50,16 @@ export default function Home({ guestLength }: HomeProps) {
   //   baseURL: 'http://localhost:8080'
   // })
 
-  const db = database
+  useEffect(() => {
+    if(count >= 10) {
+      setCount(0)
+    }else {
+      setCount((count) => count + 1)
 
-  const guestRef = ref(db, 'guests')
-  onValue(guestRef, snapshot => {
-    const data: GuestType[] = snapshot.val() ?? {}
-    const parsedData = Object.entries(data).map(([key, value]) => {
-      return {
-        name: value.name,
-        phone: value.phone,
-        email: value.email
-      }
-    })
-    guestLength = parsedData.length
-  })
-
-  const companionRef = ref(db, 'companions')
-  onValue(companionRef, snapshot => {
-    const data: CompanionType[] = snapshot.val() ?? {}
-    const parsedData = Object.entries(data).map(([key, value]) => {
-      return {
-        name: value.name,
-        phone: value.phone,
-        email: value.email
-      }
-    })
-    guestLength += parsedData.length
-  })
+    }
+    listGuests()
+    console.log(count)
+  }, [count])
 
   const clearData = () => {
     setName('')
@@ -124,6 +104,8 @@ export default function Home({ guestLength }: HomeProps) {
     //   guestLength += companion.length
     // })
 
+    let g = 0
+
     const db = database
 
     const guestRef = ref(db, 'guests')
@@ -136,7 +118,8 @@ export default function Home({ guestLength }: HomeProps) {
           email: value.email
         }
       })
-      guestLength = parsedData.length
+      g = parsedData.length
+      // setLength(parsedData.length)
     })
 
     const companionRef = ref(db, 'companions')
@@ -149,10 +132,11 @@ export default function Home({ guestLength }: HomeProps) {
           email: value.email
         }
       })
-      guestLength += parsedData.length
+      g += parsedData.length
     })
 
-    setGuests(guestLength)
+    setGuests(g)
+    setLength(g)
   }
 
   function addNewGuess() {
@@ -291,7 +275,7 @@ export default function Home({ guestLength }: HomeProps) {
             <img src="/images/beer-button.svg" alt="icon" />
             Confirmar presença
           </button>
-          <h3>Restam apenas {50 - guestLength} de 50 vagas.</h3>
+          <h3>Restam apenas {50 - length} de 50 vagas.</h3>
 
           <div className={styles.address}>
             <img src="/images/map.svg" alt="map pin" />
@@ -301,54 +285,4 @@ export default function Home({ guestLength }: HomeProps) {
       </main>
     </>
   )
-}
-
-export const getStaticProps: GetStaticProps = async () => {
-  let guestLength = 0
-    // await api.get('/api/v1/guests')
-    // .then(res => {
-    //   const guest: GuestType[] = res.data ?? {}
-    //   guestLength = guest.length
-    //   setGuest(guest)
-    // })
-
-    // await api.get('/api/v1/companions')
-    // .then(res => {
-    //   const companion: ResponseCompanionType[] = res.data ?? {}
-    //   guestLength += companion.length
-    // })
-
-    const db = database
-
-    const guestRef = ref(db, 'guests')
-    onValue(guestRef, snapshot => {
-      const data: GuestType[] = snapshot.val() ?? {}
-      const parsedData = Object.entries(data).map(([key, value]) => {
-        return {
-          name: value.name,
-          phone: value.phone,
-          email: value.email
-        }
-      })
-      guestLength = parsedData.length
-    })
-
-    const companionRef = ref(db, 'companions')
-    onValue(companionRef, snapshot => {
-      const data: CompanionType[] = snapshot.val() ?? {}
-      const parsedData = Object.entries(data).map(([key, value]) => {
-        return {
-          name: value.name,
-          phone: value.phone,
-          email: value.email
-        }
-      })
-      guestLength += parsedData.length
-    })
-  
-  return {
-    props: {
-      guestLength,
-    }
-  }
 }
