@@ -1,0 +1,115 @@
+.mainContainer {
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    background: #F6F6F6;
+    color: #29292e;
+
+    padding: 40px;
+
+    div {
+        display: flex;
+        flex-direction: column;
+
+        width: 100%;
+
+        align-items: center;
+        justify-content: center;
+
+        h2 {
+            color: #29292e;
+        }
+
+        .confirmedRow {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+
+            align-items: center;
+            margin: 0 auto;
+
+            gap: 22px;
+
+            margin-top: 2rem;
+
+            .group {
+                align-items: flex-start;
+
+                h3 {
+                    font-size: 24px;
+                    font-weight: 900;
+                }
+            }
+        }
+
+        .guestCard {
+            margin-top: 4rem;
+
+            width: 100%;
+
+            ul {
+                list-style: none;
+
+                width: 100%;
+                align-self: flex-start;
+
+                li {
+                    padding: 12px;
+                    span {
+                        font-weight: 700;
+                        font-size: 16px;
+                    }
+
+                    .guestData {
+                        width: 100%;
+                        align-items: flex-start;
+
+                        h4 {
+                            font-weight: 600;
+                            font-size: 14px;
+
+                            color: #878DA4;
+                        }
+
+                        margin-bottom: 1rem;
+                    }
+
+                    .subtitle {
+                        font-size: 12px;
+                        font-weight: 600;
+                    }
+
+                    .companionsList {
+                        ul {
+                            li {
+                                align-items: flex-start;
+                                background: #EEEEEE;
+    
+                                .companionData {
+                                    align-items: flex-start;
+                                    
+                                    h4 {
+                                        color: #878DA4;
+                                    }
+                                }
+
+                                &+ li {
+                                    margin-top: 8px;
+                                }
+                            }
+                        }
+                    }
+
+                    hr {
+                        margin-top: 1rem;
+                        border: none;
+                        border-bottom: 1px solid #EAEAEA;
+                    }
+                }
+            }
+        }
+    }
+}

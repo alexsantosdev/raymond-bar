@@ -21,13 +21,13 @@ import { Modal } from '@/components/modal'
 type CompanionType = {
   name: string,
   phone: string,
-  email: string
+  rg: string
 }
 
 type GuestType = {
   name : string,
   phone: string,
-  email: string,
+  rg: string,
   companions: CompanionType[]
 }
 
@@ -37,7 +37,7 @@ export default function Home() {
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
-  const [email, setEmail] = useState('')
+  const [rg, setRG] = useState('')
   const [hasCompanion, setHasCompanion] = useState('')
   const [companions, setCompanions] = useState<CompanionType[]>([])
   const [confirm, setConfirm] = useState(false)
@@ -55,7 +55,6 @@ export default function Home() {
       setCount(0)
     }else {
       setCount((count) => count + 1)
-
     }
     listGuests()
     console.log(count)
@@ -64,7 +63,7 @@ export default function Home() {
   const clearData = () => {
     setName('')
     setPhone('')
-    setEmail('')
+    setRG('')
     setCompanions([])
   }
 
@@ -74,7 +73,7 @@ export default function Home() {
     await set(ref(db, 'guests/' + guestId), {
       name: name,
       phone: phone,
-      email: email
+      rg: rg
     })
 
     if(companions.length !== 0) {
@@ -82,7 +81,7 @@ export default function Home() {
         let uniqueId = c.name.toLowerCase().trim()
         set(ref(db, 'companions/' + uniqueId), {
           name: c.name,
-          email: c.email,
+          rg: c.rg,
           phone: c.phone,
           guest_name: name
         })
@@ -115,7 +114,7 @@ export default function Home() {
         return {
           name: value.name,
           phone: value.phone,
-          email: value.email
+          rg: value.rg
         }
       })
       g = parsedData.length
@@ -129,7 +128,7 @@ export default function Home() {
         return {
           name: value.name,
           phone: value.phone,
-          email: value.email
+          rg: value.rg
         }
       })
       g += parsedData.length
@@ -142,7 +141,7 @@ export default function Home() {
   function addNewGuess() {
     setCompanions([
       ...companions,
-      {name: '', phone: '', email: ''}
+      {name: '', phone: '', rg: ''}
     ])
   }
 
@@ -165,7 +164,11 @@ export default function Home() {
     }
 
     if(phone.trim() === '') {
-      return toast.error('O campo idade deve ser preenchido.')
+      return toast.error('O campo telefone deve ser preenchido.')
+    }
+
+    if(rg.trim() === '') {
+      return toast.error('O campo RG deve ser preenchido.')
     }
 
     if(hasCompanion.trim() === '') {
@@ -184,12 +187,12 @@ export default function Home() {
           return toast.error('Um dos campos de telefone dos convidados está vazio.')
         }
 
-        if(item.email.trim() === '') {
+        if(item.rg.trim() === '') {
           setConfirm(false)
-          return toast.error('Um dos campos de email está vazio.')
+          return toast.error('Um dos campos de RG está vazio.')
         }
 
-        if(item.name.trim() !== '' && item.email.trim() !== '' && item.phone.trim() !== '') {
+        if(item.name.trim() !== '' && item.rg.trim() !== '' && item.phone.trim() !== '') {
           setConfirm(true)
         }
       })
@@ -251,7 +254,7 @@ export default function Home() {
               <input type='text' placeholder='Seu telefone' value={phone} onChange={e => setPhone(e.target.value)} />
             </div>
             <div className={styles.row}>
-              <input type="text" placeholder='Email' value={email} onChange={e => setEmail(e.target.value)} />
+              <input type="text" placeholder='RG' value={rg} onChange={e => setRG(e.target.value)} />
               <select value={hasCompanion} onChange={e => setHasCompanion(e.target.value)}>
                 <option value='' hidden>Possui acompanhante?</option>
                 <option value='sim'>Sim</option>
@@ -264,7 +267,7 @@ export default function Home() {
               return(
                 <div className={styles.row}>
                   <input name='name' type='text' placeholder='Nome do acompanhante' value={guessItem.name} onChange={e => setCompanionItemValue(index, 'name', e.target.value)} />
-                  <input type="text" placeholder='Email' value={guessItem.email} onChange={e => setCompanionItemValue(index, 'email', e.target.value)} />
+                  <input type="text" placeholder='RG' value={guessItem.rg} onChange={e => setCompanionItemValue(index, 'rg', e.target.value)} />
                   <input name='phone' type='text' placeholder='Telefone' value={guessItem.phone} onChange={e => setCompanionItemValue(index, 'phone', e.target.value)} />
                 </div>
               )
