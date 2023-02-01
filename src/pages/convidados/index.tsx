@@ -107,7 +107,7 @@ export default function Convidados() {
                                         <span>{g.name}</span>
                                         <div className={styles.guestData}>
                                             <h4>Cel: {phoneMask(g.phone)}</h4>
-                                            <h4>RG: {documentMask(g.rg ? g.rg : '000000000')}</h4>
+                                            <h4>RG: {g.rg}</h4>
                                         </div>
                                         <span className={styles.subtitle}>Acompanhantes:</span>
                                         <div className={styles.companionsList}>
