@@ -282,7 +282,7 @@ export default function Home() {
 
           <div className={styles.address}>
             <img src="/images/map.svg" alt="map pin" />
-            <span><a style={{color: '#2eb2ff'}} href="https://www.google.com/maps/place/Reserva+da+Mata+-+JUNDIA%C3%8D+%2F+CONDOM%C3%8DNIO/@-23.1176252,-46.9217467,17z/data=!3m1!4b1!4m5!3m4!1s0x94cf2f23addbb079:0x68798f85b22b916!8m2!3d-23.1176252!4d-46.919558" target="_blank">Av. Nicola Accieri, S/N - Condomínio 7763, Reserva da mata.</a> | 11/02 - 18h às 22h</span>
+            <span><a style={{color: '#2eb2ff'}} href="https://www.google.com/maps/place/Reserva+da+Mata+-+JUNDIA%C3%8D+%2F+CONDOM%C3%8DNIO/@-23.1176252,-46.9217467,17z/data=!3m1!4b1!4m5!3m4!1s0x94cf2f23addbb079:0x68798f85b22b916!8m2!3d-23.1176252!4d-46.919558" target="_blank">Av. Nicola Accieri, S/N - Condomínio 7763, Reserva da mata.</a> | 11/02 - 17h às 22h</span>
           </div>
         </div>
       </main>

@@ -23,7 +23,23 @@ export default function Convidados() {
     const [guests, setGuests] = useState<GuestType[]>([])
     const [companions, setCompanions] = useState<CompanionType[]>([])
 
-    const listGuests = async () => {
+    function documentMask(v0: string,errChar='?'){
+        const v = v0.toUpperCase().replace(/[^\dX]/g,'');
+        return (v.length==8 || v.length==9)?
+           v.replace(/^(\d{1,2})(\d{3})(\d{3})([\dX])$/,'$1.$2.$3-$4'):
+           (errChar+v0)
+        ;
+    }
+
+    const phoneMask = (value: string) => {
+        if (!value) return ""
+        value = value.replace(/\D/g,'')
+        value = value.replace(/(\d{2})(\d)/,"($1) $2")
+        value = value.replace(/(\d)(\d{4})$/,"$1-$2")
+        return value
+    }
+
+    const listGuests = () => {
         const db = database
     
         const guestRef = ref(db, 'guests')
@@ -90,8 +106,8 @@ export default function Convidados() {
                                     <li key={g.rg}>
                                         <span>{g.name}</span>
                                         <div className={styles.guestData}>
-                                            <h4>Cel: {g.phone}</h4>
-                                            <h4>RG: {g.rg}</h4>
+                                            <h4>Cel: {phoneMask(g.phone)}</h4>
+                                            <h4>RG: {documentMask(g.rg ? g.rg : '000000000')}</h4>
                                         </div>
                                         <span className={styles.subtitle}>Acompanhantes:</span>
                                         <div className={styles.companionsList}>
@@ -101,7 +117,7 @@ export default function Convidados() {
                                                         <li key={comp.rg}>
                                                             <span>{comp.name}</span>
                                                             <div className={styles.companionData}>
-                                                                <h4>Cel: {comp.phone}</h4>
+                                                                <h4>Cel: {phoneMask(comp.phone)}</h4>
                                                                 <h4>RG: {comp.rg}</h4>
                                                             </div>
                                                         </li>
