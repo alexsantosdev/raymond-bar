@@ -106,7 +106,7 @@ export default function Convidados() {
                                     <li key={g.rg}>
                                         <span>{g.name}</span>
                                         <div className={styles.guestData}>
-                                            <h4>Cel: {phoneMask(g.phone)}</h4>
+                                            <h4>Cel: {g.phone}</h4>
                                             <h4>RG: {g.rg}</h4>
                                         </div>
                                         <span className={styles.subtitle}>Acompanhantes:</span>
