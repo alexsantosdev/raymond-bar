@@ -76,16 +76,18 @@ export default function Home() {
       rg: rg
     })
 
-    if(companions.length !== 0) {
-      companions.map(c => {
-        let uniqueId = c.name.toLowerCase().trim()
-        set(ref(db, 'companions/' + uniqueId), {
-          name: c.name,
-          rg: c.rg,
-          phone: c.phone,
-          guest_name: name
+    if(hasCompanion) {
+      if(companions.length !== 0) {
+        companions.map(c => {
+          let uniqueId = c.name.toLowerCase().trim()
+          set(ref(db, 'companions/' + uniqueId), {
+            name: c.name,
+            rg: c.rg,
+            phone: c.phone,
+            guest_name: name
+          })
         })
-      })
+      }
     }
   }
 
